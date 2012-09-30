@@ -1,0 +1,14 @@
+www:
+    type: perl-worker
+    approot: app
+    ports:
+        www: http
+    process: hypnotoad -f app.pl
+    requirements:
+        - JSON
+        - Mojolicious
+        - DBI
+        - DBD::mysql
+
+db:
+    type: mysql
