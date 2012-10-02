@@ -4,19 +4,37 @@ use JSON;
 use DBI;
 use DBD::mysql;
 
-open my $fh, "<", "/home/dotcloud/environment.json" or die $!;
-my $env = JSON::decode_json(join '', <$fh>);
+
+my $envFilename = "/home/dotcloud/environment.json";
+my ($user, $password, $host, $port, $env, $webPort);
+
+if ( -e $envFilename ) {
+    open my $fh, "<", $envFilename or die $!;
+    $env = JSON::decode_json(join '', <$fh>);
+
+    $user = $env->{DOTCLOUD_DB_MYSQL_LOGIN};
+    $password = $env->{DOTCLOUD_DB_MYSQL_PASSWORD};
+    $host = $env->{DOTCLOUD_DB_MYSQL_HOST};
+    $port = $env->{DOTCLOUD_DB_MYSQL_PORT};
+
+    $webPort = $env->{PORT_WWW};
+}
+else {
+    # local config
+    $user = "root";
+    $password = "root";
+    $host = "localhost";
+    $port = "3306";
+
+    $webPort = "8080";
+}
 
 
 my $database = 'test';
-my $user = $env->{DOTCLOUD_DB_MYSQL_LOGIN};
-my $password = $env->{DOTCLOUD_DB_MYSQL_PASSWORD};
-my $host = $env->{DOTCLOUD_DB_MYSQL_HOST};
-my $port = $env->{DOTCLOUD_DB_MYSQL_PORT};
-my $dbh = DBI->connect("DBI:mysql:$database:$host:$port", $user, $password) or 
+my $dbh = DBI->connect("DBI:mysql:database=$database;host=$host;port=$port", $user, $password) or 
     die "Couldn't connect to database: " . DBI->errstr;
 
-app->config(hypnotoad => {listen => ['http://*:'.$env->{PORT_WWW}]});
+app->config(hypnotoad => {listen => ['http://*:' . $webPort]});
 
 get '/' => sub {
     my $self = shift;
