@@ -11,7 +11,6 @@ www:
         - JSON
         - Mojolicious
         - DBI
-        - DBD
         - DBD::mysql
 db:
     type: mysql
